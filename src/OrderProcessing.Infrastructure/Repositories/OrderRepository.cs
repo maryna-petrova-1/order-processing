@@ -9,7 +9,6 @@ public class OrderRepository(OrdersDbContext context) : IOrderRepository
     public async Task<Order?> GetByIdAsync(int id, CancellationToken token = default)
     {
         return await context.Orders
-            .AsNoTracking()
             .Include(o => o.Items)
                 .ThenInclude(i => i.Product)
             .FirstOrDefaultAsync(o => o.Id == id, token);
@@ -18,7 +17,6 @@ public class OrderRepository(OrdersDbContext context) : IOrderRepository
     public async Task<IReadOnlyList<Order>> GetAllAsync(CancellationToken token = default)
     {
         return await context.Orders
-            .AsNoTracking()
             .Include(o => o.Items)
                 .ThenInclude(i => i.Product)
             .ToListAsync(token);
