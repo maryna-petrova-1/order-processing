@@ -141,6 +141,7 @@ The service seeds sample data on startup to facilitate local development and tes
 - **Health Checks**: Add endpoint to monitor service health.
 - **API Versioning**: Add versioning for future backward compatibility.
 - **Docker `.env` File**: Allow overriding configuration values via environment variables.
+- **Unit and Integration Tests**: Write automated tests to ensure correctness and reliability of API and background processing.
 
 ## RabbitMQ Usage
 
