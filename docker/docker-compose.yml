@@ -1,0 +1,76 @@
+version: "3.9"
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql-server
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=123Qwer0000
+    ports:
+      - "1433:1433"
+    volumes:
+      - ms_sql_data:/var/opt/mssql
+    networks:
+      - order-net
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - order-net
+
+  api:
+    build:
+      context: ../
+      dockerfile: src/OrderProcessing.Api/Dockerfile
+    container_name: order-api
+    depends_on:
+      - sqlserver
+      - rabbitmq
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sql-server,1433;Database=Orders;User ID=sa;Password=123Qwer0000;MultipleActiveResultSets=False;Persist Security Info=True;Encrypt=False;TrustServerCertificate=True;
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=guest
+      - RabbitMq__Password=guest
+      - RabbitMq__VHost=/
+      - RabbitMq__Port=5672
+    ports:
+      - "5050:8080"
+    networks:
+      - order-net
+
+  worker:
+    build:
+      context: ../
+      dockerfile: src/OrderProcessing.Worker/Dockerfile
+    container_name: order-worker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sql-server,1433;Database=Orders;User ID=sa;Password=123Qwer0000;MultipleActiveResultSets=False;Persist Security Info=True;Encrypt=False;TrustServerCertificate=True;
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=guest
+      - RabbitMq__Password=guest
+      - RabbitMq__VHost=/
+      - RabbitMq__Port=5672
+    networks:
+      - order-net
+
+volumes:
+  ms_sql_data:
+
+networks:
+  order-net:

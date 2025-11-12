@@ -1,7 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <ProjectReference Include="../OrderProcessing.Contracts/OrderProcessing.Contracts.csproj" />
     <ProjectReference Include="..\OrderProcessing.Domain\OrderProcessing.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MassTransit" Version="8.5.5" />
   </ItemGroup>
 
   <PropertyGroup>
